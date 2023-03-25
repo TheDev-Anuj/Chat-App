@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>chat</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h1>Group Name: {{ groupname }}</h1>
+        <textarea id='show-msg' cols=100 rows=15 placeholder='Message will shown here...' disabled>{% for chat in chats %}{{ chat.content }}
+{% endfor %}</textarea>
+        <br><br>
+        <p>
+            <input type='text' id='input-msg' placeholder='Type any message...'> 
+            <input type='submit' onclick='sendmsg()' value='Send'>
+        </p>
+
+        <script>
+            const ws = new WebSocket('ws://127.0.0.1:8000/'+ '{{ groupname }}' + '/');
+            ws.onopen = (event) => {
+                console.log(event)
+            };
+            ws.onmessage = (event) => {
+                const msg = event.data
+                document.querySelector('#show-msg').value += msg + '\n'
+            };
+            function sendmsg() {
+                const msg = document.querySelector('#input-msg').value
+                ws.send(msg)
+                document.querySelector('#input-msg').value = ''
+            }
+        </script>
+    </body>
+</html>
