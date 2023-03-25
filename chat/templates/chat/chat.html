@@ -1,37 +1,89 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>chat</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
-    </head>
-    <body>
-        <h1>Group Name: {{ groupname }}</h1>
-        <textarea id='show-msg' cols=100 rows=15 placeholder='Message will shown here...' disabled>{% for chat in chats %}{{ chat.content }}
-{% endfor %}</textarea>
-        <br><br>
-        <p>
-            <input type='text' id='input-msg' placeholder='Type any message...'> 
-            <input type='submit' onclick='sendmsg()' value='Send'>
-        </p>
+{% extends 'layout.html' %} 
+{% block title %}{{ groupname }} - ChatApp{% endblock %} 
+{% block body %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<div class="container-fluid col-sm-12 col-md-10">
+  <div class="row pt-3">
+    <h1 class="text-center text-light bg-dark">Group Name: {{ groupname }}</h1>
+  </div>
+  <div class="row pt-3">
+    <div class="container-fluid" id="show-msg">
+        {% for chat in chats %}
+        <div class="row">
+            <div class="col-sm-10 col-md-8">
+                <p class="bg-primary text-white border border-primary rounded">
+                    &emsp;{{ chat }}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+  <div class="row pt-3 fixed-bottom">
+    <div class="col-sm-8 col-md-10">
+      <input
+        type="text"
+        id="input-msg"
+        placeholder="Type any message..."
+        class="w-100"
+      />
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <button
+        type="button"
+        onclick="sendmsg(); contentscrollBar()"
+        class="w-100 btn btn-primary"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          class="bi bi-send"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"
+          ></path>
+        </svg>
+        &ensp;Send
+        </button>
+    </div>
+  </div>
+</div>
 
-        <script>
-            const ws = new WebSocket('ws://127.0.0.1:8000/'+ '{{ groupname }}' + '/');
-            ws.onopen = (event) => {
-                console.log(event)
-            };
-            ws.onmessage = (event) => {
-                const msg = event.data
-                document.querySelector('#show-msg').value += msg + '\n'
-            };
-            function sendmsg() {
-                const msg = document.querySelector('#input-msg').value
-                ws.send(msg)
-                document.querySelector('#input-msg').value = ''
-            }
-        </script>
-    </body>
-</html>
+<script>
+  const ws = new WebSocket("ws://127.0.0.1:8000/" + "{{ groupname }}" + "/");
+  ws.onopen = (event) => {
+    console.log(event);
+  };
+  ws.onmessage = (event) => {
+    const msg = event.data;
+    document.querySelector("#show-msg").innerHTML += 
+        `<div class="row">
+            <div class="col-sm-10 col-md-8">
+                <p class="bg-primary text-white border border-success rounded">&emsp;${msg}</p>
+            </div>
+        </div>`
+    ;
+  };
+  function sendmsg() {
+    const msg = document.querySelector("#input-msg").value;
+    ws.send(msg);
+    document.querySelector("#input-msg").value = "";
+  }
+  function contentscrollBar() {
+    $(document).ready(function () {
+      var $content1 = $("#show-msg");
+      $content1.scrollTop($content1[0].scrollHeight);
+    });
+  }
+  document.getElementById("input-msg").addEventListener("keydown", (e) => {
+    if (e.code === "Enter") {
+      sendmsg();
+      contentscrollBar();
+    }
+  });
+  
+</script>
+{% endblock %}
